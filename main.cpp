@@ -22,21 +22,23 @@ int main(int argc, char **argv) {
     Param<int> p = b.parameter();
     HIP_CHECK(hipMemcpy(p_d, &p, sizeof(Param<int>), hipMemcpyHostToDevice));
 
-    for (int i = 0; i < 8; i++)
-    {
-        printf("A %p %p %zu %d\n", p_d->Src[i], p_d->Dst[i],p_d->size,p_d->Src[i][0]);
-    }
+
+    HIP_CHECK(hipEventRecord(startEvent, stream));
     hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p_d); 
+    HIP_CHECK(hipEventRecord(stopEvent, stream));    
+
     HIP_CHECK(hipDeviceSynchronize());
+    float gpuDeltaMsec;
+    HIP_CALL(hipEventElapsedTime(&gpuDeltaMsec, startEvent, stopEvent));
 //    Copier<int> c;    
 //    c.run(*p_d);
 
-
+/*
     for (int i = 0; i < devices; i++)
     {
         compareArrays(b._src[i], b._dst[i], size);
         //printf("device %d: %d , %d \n", i,b._src[i][0],b._dst[i][0]);
     }
-
+*/
     return 0;
 }

@@ -69,6 +69,8 @@ RemoteCopy_Warp(Param<T> const& p)
 
         for (size_t loopOffset = threadId; loopOffset < size; loopOffset += loopInc)
         {
+            printf("warpId %d size %ld dst %p src %p\n", warpId, p.size, dst + loopOffset, src + loopOffset);
+            if ((char*)(src + loopOffset) >  ((char*)p.Src[warpId + i] + p.size)) printf("Don't do that!\n");
             Copy<UNROLL, WARP_SIZE, T>(dst + loopOffset, src + loopOffset);
         }
     }
