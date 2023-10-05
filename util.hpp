@@ -1,3 +1,4 @@
+#include "header.hpp"
 
 void compareArrays(int* hostArray, int* deviceArray, int numElems) {
     for (auto i=0; i<numElems; i++) 
