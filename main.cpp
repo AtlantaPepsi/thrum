@@ -26,10 +26,10 @@ int main(int argc, char **argv) {
     {
         printf("A %p %p %zu %d\n", p_d->Src[i], p_d->Dst[i],p_d->size,p_d->Src[i][0]);
     }
-    hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p_d); 
-    HIP_CHECK(hipDeviceSynchronize());
-    //Copier<int> c;    
-    //c.run(*p_d);
+    //hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p_d); 
+    //HIP_CHECK(hipDeviceSynchronize());
+    Copier<int> c;    
+    c.run(*p_d);
 
 /*
     for (int i = 0; i < devices; i++)
