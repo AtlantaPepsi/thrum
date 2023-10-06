@@ -12,6 +12,6 @@ public:
     //void run(T cpyf, Param p)
     void run(Param<T> &p)
     {
-        hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p); 
+        hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, p); 
     }
 };
