@@ -28,15 +28,15 @@ int main(int argc, char **argv) {
     }
     hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p_d); 
     HIP_CHECK(hipDeviceSynchronize());
-//    Copier<int> c;    
-//    c.run(*p_d);
+    //Copier<int> c;    
+    //c.run(*p_d);
 
-
+/*
     for (int i = 0; i < devices; i++)
     {
         compareArrays(b._src[i], b._dst[i], size);
         //printf("device %d: %d , %d \n", i,b._src[i][0],b._dst[i][0]);
     }
-
+*/
     return 0;
 }
