@@ -9,11 +9,7 @@ int main(int argc, char **argv) {
 
     int devices, size = argc > 1 ? atoi(argv[1]) : 1 << 25;
     int iter = argc > 2 ? atoi(argv[2]) : 5;
-    hipEvent_t startEvent, stopEvent;
-    float gpuTimeMs;
 
-    HIP_CHECK(hipEventCreate(&startEvent));
-    HIP_CHECK(hipEventCreate(&stopEvent));
 
     HIP_CHECK(hipGetDeviceCount(&devices));
     SetUpPeer(devices);
@@ -29,16 +25,9 @@ int main(int argc, char **argv) {
     Param<int> p = b.parameter();
     HIP_CHECK(hipMemcpy(p_d, &p, sizeof(Param<int>), hipMemcpyHostToDevice));
 
- 
-    HIP_CHECK(hipEventRecord(startEvent, 0));
-    hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, *p_d); 
-    HIP_CHECK(hipEventRecord(stopEvent, 0));
-
-    HIP_CHECK(hipDeviceSynchronize());
-    HIP_CHECK(hipEventElapsedTime(&gpuTimeMs, startEvent, stopEvent));
-//    Copier<int> c;    
-//    c.run(*p_d);
-    printf("ms: %f\n", gpuTimeMs);
+    Copier<int> c;    
+    auto t = c.run(*p_d);
+    printf("ms: %f\n", t);
 /*
     for (int i = 0; i < devices; i++)
     {
@@ -46,8 +35,7 @@ int main(int argc, char **argv) {
         //printf("device %d: %d , %d \n", i,b._src[i][0],b._dst[i][0]);
     }
 */
-    HIP_CHECK(hipEventDestroy(startEvent));
-    HIP_CHECK(hipEventDestroy(stopEvent));
 
+    HIP_CHECK(hipDeviceSynchronize());
     return 0;
 }

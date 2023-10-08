@@ -17,7 +17,6 @@ public:
     Buffer(size_t size, int devices);
     //Buffer();
     ~Buffer();
-    
 };
 
 template <typename T>
@@ -37,7 +36,7 @@ Param<T> Buffer<T>::parameter()
 template <typename T>
 void Buffer<T>::reset()
 { 
-    int count = 0; //change to rand/others later
+    int count = 0; //TODO: change to rand/others later
     for (int i = 0; i < _devices; i++)
     {
         HIP_CHECK(hipSetDevice(i));
@@ -70,6 +69,8 @@ printf("it worked!\n");
 template <typename T>
 Buffer<T>::~Buffer()
 {
+    HIP_CHECK(hipDeviceSynchronize()); //very important guard at end of main
+
     free(hostBuffer);
     for (int i = 0; i < _devices; i++)
     {
