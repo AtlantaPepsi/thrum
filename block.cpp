@@ -1,14 +1,10 @@
-#include "../header.hpp"
-#include "../util.hpp"
-#include <iostream>
+#include "header.hpp"
+#include "util.hpp"
 #include <chrono>
+#include <iostream>
 
-int main(int argc, char **argv) {
+int main() {
 
-    if (argc < 2)
-        numElems = 1 << 25;
-    else
-        numElems = atoi(argv[1]);
     int devices, numElems = 1 << 25; //33.55MB
     int *hostArray = (int*)malloc(sizeof(int) * numElems);
     HIP_CHECK(hipGetDeviceCount(&devices));
@@ -31,8 +27,8 @@ int main(int argc, char **argv) {
 
 
     //main test: work to each device split across 4 block
-    //WarpCopy test (7 -> 0-7), 4 warp per block
-    //warp 0s: -> device 0,4; warp 1s: -> device 1,5 ...
+    //BlockCopy test (7 -> 0-7), 4 block
+    //Block 1: -> device 0,4; Block 2: -> device 1,5 ...
 
     int *src7; 
     HIP_CHECK(hipSetDevice(7)); 
@@ -54,16 +50,17 @@ int main(int argc, char **argv) {
     //assert size % blockidx == 0
     //assert numSrc = numDst ..?
     HIP_CHECK(hipMemcpy(p_d, &p, sizeof(Param), hipMemcpyHostToDevice));
+    
+    const auto start = std::chrono::high_resolution_clock::now();
 
-    const auto start = std::chrono::high_resolution_clock::now();  
-
-    hipLaunchKernelGGL(RemoteCopy_Warp<2>, 4, BLOCKSIZE, 0, 0, *p_d);
+    hipLaunchKernelGGL(RemoteCopy_Block<1>, 4, BLOCKSIZE, 0, 0, *p_d);
     HIP_CHECK(hipDeviceSynchronize());
 
-    const auto end = std::chrono::high_resolution_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now(); 
     const std::chrono::duration<double> diff = end - start;
-    auto ms = std::chrono::duration_cast<std::chrono::microseconds>(diff);
-    std::cout << ms.count() << " microsec" << std::endl;
+    auto ms = std::chrono::duration_cast<std::chrono::microseconds>(diff); 
+    std::cout << ms.count() << " microsec" << std::endl;   
+ 
 
     hipFree(src7);
     for (int i = 0; i < devices; i++)

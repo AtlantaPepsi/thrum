@@ -1,5 +1,5 @@
-#include "../header.hpp"
-#include "../util.hpp"
+#include "header.hpp"
+#include "util.hpp"
 
 int main() {
 
