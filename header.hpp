@@ -1,3 +1,5 @@
+#pragma once
+
 #include <hip/hip_runtime.h>
 #include <hip/hip_runtime_api.h>
 
@@ -25,18 +27,20 @@
 #define MAX_SRCS 16
 #define MAX_DSTS 16
 
+template <typename T>
 struct Param
 {
     size_t      size;
     int const   devices;
     int const   numSrc;
     int const   numDst;
-    int*        Src[MAX_SRCS];
-    int*        Dst[MAX_DSTS];
+    T*          Src[MAX_SRCS];
+    T*          Dst[MAX_DSTS];
 };
 
-template <int UNROLL, int STRIDE>
-inline __device__ void Copy(int* __restrict__ dst, int const* __restrict__ src)
+template <int UNROLL, int STRIDE, typename T> 
+//template <typename T>
+inline __device__ void Copy(T* __restrict__ dst, T const* __restrict__ src)
 {
     #pragma unroll
     for (int i = 0; i < UNROLL; i++)
@@ -47,9 +51,9 @@ inline __device__ void Copy(int* __restrict__ dst, int const* __restrict__ src)
 
 //warp from each block cooperate, one source to all dst
 //p.size is total memcpy btw src-dst pair
-template <int UNROLL>
+template <int UNROLL, typename T>
 __global__ void __launch_bounds__(BLOCKSIZE)
-RemoteCopy_Warp(Param const& p)
+RemoteCopy_Warp(Param<T> const& p)
 {
     int const warpId     = threadIdx.x / WARP_SIZE; // Warp index 
     int const threadId   = threadIdx.x % WARP_SIZE; // Thread index within warp
@@ -65,11 +69,17 @@ RemoteCopy_Warp(Param const& p)
 
         for (size_t loopOffset = threadId; loopOffset < size; loopOffset += loopInc)
         {
-            Copy<UNROLL,WARP_SIZE>(dst + loopOffset, src + loopOffset);
+            //printf("warpId %d size %ld dst %p src %p\n", warpId, p.size, dst + loopOffset, src + loopOffset);
+            if ((src + loopOffset) >  (p.Src[warpId + i] + p.size))
+            {
+                printf("Don't do that!%zu, %zu, %zu \n",p.size,loopOffset,blockId*size);
+                assert(0);
+            }
+            Copy<UNROLL, WARP_SIZE, T>(dst + loopOffset, src + loopOffset);
         }
     }
 }
-
+/*
 //scatter style, 1 block to 1 dst, all block on same device/buffer
 template <int UNROLL>
 __global__ void __launch_bounds__(BLOCKSIZE) // is this needed?
@@ -129,4 +139,4 @@ RemoteCopy_PtoP(size_t const size,
     {
         Copy<UNROLL,WARP_SIZE>(Dst + offset, Src + offset);
     }
-}
+}*/
