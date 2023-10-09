@@ -46,7 +46,6 @@ void Buffer<T>::reset()
         }
         HIP_CHECK(hipMemcpy(_src[i], hostBuffer, sizeof(T) * s_size, hipMemcpyHostToDevice));
     }
-printf("count: %d\n",count);
 }
 
 template <typename T>
@@ -63,7 +62,7 @@ Buffer<T>::Buffer(size_t size, int devices) : r_size(size), _devices(devices)
     }
 
     reset();
-printf("it worked!\n");
+printf("buffer allocated\n");
 }
 
 template <typename T>
@@ -77,5 +76,5 @@ Buffer<T>::~Buffer()
         HIP_CHECK(hipFree(_src[i]));
         HIP_CHECK(hipFree(_dst[i])); 
     }
-printf("it worked again!\n");
+printf("buffer deallocated\n");
 }

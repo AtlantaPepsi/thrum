@@ -69,7 +69,6 @@ RemoteCopy_Warp(Param<T> const& p)
 
         for (size_t loopOffset = threadId; loopOffset < size; loopOffset += loopInc)
         {
-            //printf("warpId %d size %ld dst %p src %p\n", warpId, p.size, dst + loopOffset, src + loopOffset);
             if ((src + loopOffset) >  (p.Src[warpId + i] + p.size))
             {
                 printf("Don't do that!%zu, %zu, %zu \n",p.size,loopOffset,blockId*size);
@@ -79,11 +78,11 @@ RemoteCopy_Warp(Param<T> const& p)
         }
     }
 }
-/*
+
 //scatter style, 1 block to 1 dst, all block on same device/buffer
-template <int UNROLL>
+template <int UNROLL, typename T>
 __global__ void __launch_bounds__(BLOCKSIZE) // is this needed?
-RemoteCopy_Block(Param const& p)
+RemoteCopy_Block(Param<T> const& p)
 {
     int const blockId    = blockIdx.x;
     int const threadId   = threadIdx.x; // Thread index within block
@@ -97,11 +96,11 @@ RemoteCopy_Block(Param const& p)
 
         for (size_t offset = threadId; offset < p.size; offset += loopInc)
         {
-            Copy<UNROLL,BLOCKSIZE>(dst + offset, src + offset); 
+            Copy<UNROLL, BLOCKSIZE, T>(dst + offset, src + offset); 
         }
     }
 }
-
+/*
 template <int UNROLL>
 __global__ void __launch_bounds__(BLOCKSIZE)
 RemoteCopy_Warp_1Block(Param const& p)

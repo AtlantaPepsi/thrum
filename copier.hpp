@@ -1,7 +1,7 @@
 #include "header.hpp"
+#include <functional>
 
-
-template <typename T>
+template <typename T> //how do i pass any function as template arg? auto F? transform?
 class Copier
 {
 public:
@@ -10,18 +10,11 @@ public:
     Copier();
     ~Copier();
 
-    //void run(T cpyf, Param p)
-    float run(Param<T> &p)
+    template <typename F>
+    float Run(Param<T> &p, F&& kernel)
     {
-/*
-        hipExtLaunchKernelGGL(RemoteCopy_Warp<1>, 
-                              4, BLOCKSIZE, 
-                              0, 0, 
-                              startEvent, stopEvent,
-                              p); //TODO: fix for nv
-*/
         HIP_CHECK(hipEventRecord(startEvent, 0));
-        hipLaunchKernelGGL(RemoteCopy_Warp<1>, 4, BLOCKSIZE, 0, 0, p);
+        hipLaunchKernelGGL(kernel, 4, BLOCKSIZE, 0, 0, p);
         HIP_CHECK(hipEventRecord(stopEvent, 0));
         HIP_CHECK(hipDeviceSynchronize());
         HIP_CHECK(hipEventElapsedTime(&gpuTimeMs, startEvent, stopEvent));
