@@ -14,6 +14,9 @@ void compareArrays(int* hostArray, int* deviceArray, int numElems) {
 
 void SetUpPeer(int devices)
 {
+    int deviceID;
+    HIP_CHECK(hipGetDevice(&deviceID));
+
     for (int i = 0; i < devices; i++)
     {
         HIP_CHECK(hipSetDevice(i));
@@ -33,4 +36,5 @@ void SetUpPeer(int devices)
         } 
         
     }
+    HIP_CHECK(hipSetDevice(deviceID));
 } 

@@ -9,7 +9,6 @@ public:
     int _devices;
     T *_src[MAX_SRCS], *_dst[MAX_DSTS], *hostBuffer;        
 
-    //Param p;             //dont keep one due to const field, return 1 in loop/scope
     
     Param<T> parameter();     //populate parameter with buffer/sys info
     void reset();
@@ -35,8 +34,11 @@ Param<T> Buffer<T>::parameter()
 
 template <typename T>
 void Buffer<T>::reset()
-{ 
+{
+    int deviceID; 
+    HIP_CHECK(hipGetDevice(&deviceID));
     int count = 0; //TODO: change to rand/others later
+
     for (int i = 0; i < _devices; i++)
     {
         HIP_CHECK(hipSetDevice(i));
@@ -46,11 +48,15 @@ void Buffer<T>::reset()
         }
         HIP_CHECK(hipMemcpy(_src[i], hostBuffer, sizeof(T) * s_size, hipMemcpyHostToDevice));
     }
+    HIP_CHECK(hipSetDevice(deviceID));
 }
 
 template <typename T>
 Buffer<T>::Buffer(size_t size, int devices) : r_size(size), _devices(devices)
 {
+    int deviceID; 
+    HIP_CHECK(hipGetDevice(&deviceID));
+
     s_size = devices * r_size;
     hostBuffer = (T*) malloc(sizeof(T) * s_size);
 
@@ -61,8 +67,8 @@ Buffer<T>::Buffer(size_t size, int devices) : r_size(size), _devices(devices)
         HIP_CHECK(hipMalloc(_dst + i, sizeof(T) * r_size));   //!!
     }
 
+    HIP_CHECK(hipSetDevice(deviceID));
     reset();
-printf("buffer allocated\n");
 }
 
 template <typename T>
@@ -76,5 +82,4 @@ Buffer<T>::~Buffer()
         HIP_CHECK(hipFree(_src[i]));
         HIP_CHECK(hipFree(_dst[i])); 
     }
-printf("buffer deallocated\n");
 }
