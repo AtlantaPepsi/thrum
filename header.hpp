@@ -1,24 +1,77 @@
 #pragma once
 
+#if defined(__NVCC__)
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+// Datatypes
+#define hipError_t                                         cudaError_t
+#define hipEvent_t                                         cudaEvent_t
+#define hipStream_t                                        cudaStream_t
+
+// Enumerations
+#define hipSuccess                                         cudaSuccess
+#define hipMemcpyHostToDevice                              cudaMemcpyHostToDevice
+#define hipMemcpyDeviceToDevice                            cudaMemcpyDeviceToDevice
+
+// Device
+#define hipDeviceSynchronize                               cudaDeviceSynchronize
+#define hipSetDevice                                       cudaSetDevice
+#define hipGetDevice                                       cudaGetDevice
+
+// Error
+#define hipGetErrorString                                  cudaGetErrorString
+
+// Stream
+#define hipStreamCreate                                    cudaStreamCreate
+#define hipStreamDestroy                                   cudaStreamDestroy
+#define hipStreamSynchronize                               cudaStreamSynchronize
+
+// Event
+#define hipEventCreate                                     cudaEventCreate
+#define hipEventRecord                                     cudaEventRecord
+#define hipEventDestroy                                    cudaEventDestroy
+#define hipEventElapsedTime                                cudaEventElapsedTime
+
+// Mem
+#define hipMalloc                                          cudaMalloc
+#define hipFree                                            cudaFree
+#define hipMemcpy                                          cudaMemcpy
+
+// P2P DMA
+#define hipDeviceCanAccessPeer                             cudaDeviceCanAccessPeer
+#define hipDeviceEnablePeerAccess                          cudaDeviceEnablePeerAccess
+#define hipGetDeviceCount                                  cudaGetDeviceCount
+
+#else
+
 #include <hip/hip_runtime.h>
 #include <hip/hip_runtime_api.h>
+
+#endif
 
 #define HIP_CHECK(condition) {                                            \
         hipError_t error = condition;                                     \
         if(error != hipSuccess){                                          \
-            fprintf(stderr,"HIP error: %d line: %d\n", error,  __LINE__); \
+            fprintf(stderr,"HIP error: %d line: %d at file %s\n", error,  \
+			    __LINE__, __FILE__); \
             exit (error);                                                 \
         }                                                                 \
     }
 
-
-#ifdef NVCC
+#if defined(__NVCC__)
     #define WARP_SIZE       32
     #define BLOCKSIZE       1024
 #else
     #define WARP_SIZE       64
     #define BLOCKSIZE       256
 #endif
+
 #define WARP_COUNT BLOCKSIZE/WARP_SIZE
 
 //https://github.com/ROCmSoftwarePlatform/rccl/blob/6ecf771832ae887ce272889b9aaab008b5e0ddb6/tools/rccl-prim-test/rccl_prim_test.cpp#L237

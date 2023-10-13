@@ -38,7 +38,7 @@ public:
     void virtual Copy(Param<T> const& p){ 
         for (int i = 0; i < p.devices; i++)
         {
-            HIP_CHECK(hipMemcpyDtoD(p.Dst[i], p.Src[i], p.size * sizeof(T)));
+            HIP_CHECK(hipMemcpy(p.Dst[i], p.Src[i], p.size * sizeof(T), hipMemcpyDeviceToDevice));
         }
         printf("hipMemcpy hipMemcpy\n");
     }
