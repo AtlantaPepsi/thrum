@@ -9,7 +9,7 @@ public:
     int _devices;
     T *_src[MAX_SRCS], *_dst[MAX_DSTS], *hostBuffer;        
 
-    
+    void check(int device, size_t size);
     Param<T> parameter();     //populate parameter with buffer/sys info
     void reset();
     
@@ -17,6 +17,31 @@ public:
     //Buffer();
     ~Buffer();
 };
+
+template <typename T>
+void Buffer<T>::check(int device, size_t size)
+{
+    T* dst = (T*) malloc(sizeof(T) * size);
+    T* src = (T*) malloc(sizeof(T) * size);
+    for (int i = 0; i < _devices; i++)
+    {
+        //compareArrays(b._src[0] + i*size, b._dst[i], size);
+        hipMemcpy(src, _src[device] + i*size, size * sizeof(T), hipMemcpyDefault);
+        hipMemcpy(dst, _dst[i],               size * sizeof(T), hipMemcpyDefault);
+
+        for (int j = 0; j < size; j++)
+        {
+            if (src[j] != dst[j])
+            {
+                printf("assertion failed at index %d: %d vs %d\n",
+                        j, src[j], dst[j]);
+                return;
+            }
+        }
+    }
+    free(dst);
+    free(src);
+}
 
 template <typename T>
 Param<T> Buffer<T>::parameter()

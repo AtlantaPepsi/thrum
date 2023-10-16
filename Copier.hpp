@@ -16,11 +16,13 @@ public:
         int device;
         HIP_CHECK(hipGetDevice(&device));
         HIP_CHECK(hipSetDevice(deviceID));
+
+        HIP_CHECK(hipMemcpy(p_d, &p, sizeof(Param<T>), hipMemcpyHostToDevice));
         
         HIP_CHECK(hipEventRecord(startEvent, 0));
         for (int i = 0; i < iter; i++)
         {    
-            Copy(p);
+            Copy(*p_d);
         }
         HIP_CHECK(hipEventRecord(stopEvent, 0));
         HIP_CHECK(hipDeviceSynchronize());
@@ -47,6 +49,7 @@ protected:
     size_t _grid; //blocksize, shmem
     int deviceID = -1;
     hipEvent_t startEvent, stopEvent;
+    Param<T> *p_d;
 };
 
 template <typename T>
@@ -55,6 +58,7 @@ Copier<T>::Copier(size_t grid) : _grid(grid)
     HIP_CHECK(hipGetDevice(&deviceID));
     HIP_CHECK(hipEventCreate(&startEvent));
     HIP_CHECK(hipEventCreate(&stopEvent));
+    HIP_CHECK(hipMalloc(&p_d, sizeof(Param<T>)));
 }
 
 template <typename T>
@@ -63,4 +67,5 @@ Copier<T>::~Copier()
     HIP_CHECK(hipSetDevice(deviceID));
     HIP_CHECK(hipEventDestroy(startEvent));
     HIP_CHECK(hipEventDestroy(stopEvent));
+    HIP_CHECK(hipFree(p_d));
 }

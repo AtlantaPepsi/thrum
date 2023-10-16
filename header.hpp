@@ -18,6 +18,7 @@
 #define hipSuccess                                         cudaSuccess
 #define hipMemcpyHostToDevice                              cudaMemcpyHostToDevice
 #define hipMemcpyDeviceToDevice                            cudaMemcpyDeviceToDevice
+#define hipMemcpyDefault                                   cudaMemcpyDefault
 
 // Device
 #define hipDeviceSynchronize                               cudaDeviceSynchronize
