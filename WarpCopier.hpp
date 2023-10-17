@@ -60,6 +60,7 @@ template <typename T, int UNROLL>
 class WarpCopier : public Copier<T>
 {
 public:
+    WarpCopier(Param<T> p, size_t grid) : Copier<T>(p, grid) {};
     void Copy() override
     {
         RemoteCopy_Warp2<T,UNROLL><<<4,BLOCKSIZE>>>(this->_p);

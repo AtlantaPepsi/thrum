@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
     //for (int i = 4; i < 32; i += 4)
     //{ 
     double t1 = 0, t2 = 0;
-    //WarpCopier<_type, 8> w_c(p,4);
-    Copier<_type, 1> c_c(p,4);
+    WarpCopier<_type, 1> w_c(p,4);
     BlockCopier<_type, 1> b_c(p,4);
 
     //t1 += w_c.Record(p);

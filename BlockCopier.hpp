@@ -53,6 +53,8 @@ template <typename T, int UNROLL>
 class BlockCopier : public Copier<T>
 {
 public:
+    BlockCopier(Param<T> p, size_t grid) : Copier<T>(p, grid) {};
+
     void Copy() override
     {
         if (this->_p.numDst > this->_grid)
