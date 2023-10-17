@@ -24,17 +24,20 @@ int main(int argc, char **argv) {
     Buffer<_type> b(size, devices);
     Param<_type> p = b.parameter(); // how abt managed mem ptr, from Buffer?
 
+    //for (int i = 4; i < 32; i += 4)
+    //{ 
     double t1 = 0, t2 = 0;
-    WarpCopier<_type, 1> w_c;
-    BlockCopier<_type, 1> b_c;
+    //WarpCopier<_type, 8> w_c(p,4);
+    Copier<_type, 1> c_c(p,4);
+    BlockCopier<_type, 1> b_c(p,4);
 
-    t1 += w_c.Record(p);
-    printf("warp copy bandwidth (GB/s): %f\n", t1);
+    //t1 += w_c.Record(p);
+    //printf("warp copy bandwidth (GB/s): %f\n", t1);
 
-    t2 += b_c.Record(p);
+    t2 += b_c.Record();
     printf("block copy bandwidth (GB/s): %f\n", t2);
-
-    b.check(0, size);
+    //}
+    //b.check(0, size);
     HIP_CHECK(hipDeviceSynchronize());
     return 0;
 }
