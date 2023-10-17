@@ -10,6 +10,8 @@ public:
     Copier(Param<T> p) : Copier(p, 4) {}
     ~Copier();
 
+    void setGridDim(size_t grid) { _grid = grid; }
+
     double Record(size_t iter = 5)
     {
         float gpuTimeMs = 0;

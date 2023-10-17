@@ -63,6 +63,10 @@ public:
     WarpCopier(Param<T> p, size_t grid) : Copier<T>(p, grid) {};
     void Copy() override
     {
-        RemoteCopy_Warp2<T,UNROLL><<<4,BLOCKSIZE>>>(this->_p);
+        if (this->_p.numDst > WARP_COUNT)
+            RemoteCopy_Warp<T,UNROLL><<<this->_grid,BLOCKSIZE>>>(*(this->p_d));
+        else
+            RemoteCopy_Warp2<T,UNROLL><<<this->_grid,BLOCKSIZE>>>(*(this->p_d));
+        // 4 warp 4 dst?
     }
 };

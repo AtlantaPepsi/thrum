@@ -57,9 +57,10 @@ public:
 
     void Copy() override
     {
-        if (this->_p.numDst > this->_grid)
-            RemoteCopy_Block<T,UNROLL><<<this->_grid,BLOCKSIZE>>>(*(this->p_d));
+        if (this->_p.numDst < this->_grid)
+            RemoteCopy_Block2<T,UNROLL><<<this->_grid,BLOCKSIZE>>>(*(this->p_d));
         else
-            printf("????\n");
+            RemoteCopy_Block<T,UNROLL><<<this->_grid,BLOCKSIZE>>>(*(this->p_d));
+        // = ?
     }
 };

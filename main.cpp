@@ -1,3 +1,5 @@
+#define FACTOR 1 //unroll factor
+
 #include "header.hpp"
 #include "util.hpp"
 #include "Buffer.hpp"
@@ -24,19 +26,22 @@ int main(int argc, char **argv) {
     Buffer<_type> b(size, devices);
     Param<_type> p = b.parameter(); // how abt managed mem ptr, from Buffer?
 
-    //for (int i = 4; i < 32; i += 4)
-    //{ 
-    double t1 = 0, t2 = 0;
-    WarpCopier<_type, 1> w_c(p,4);
-    BlockCopier<_type, 1> b_c(p,4);
+    WarpCopier<_type, FACTOR> w_c(p, 4);
+    BlockCopier<_type, FACTOR> b_c(p, 4);
 
-    //t1 += w_c.Record(p);
-    //printf("warp copy bandwidth (GB/s): %f\n", t1);
+    for (int i = 4; i < 32; i *= 2)
+    {
+        printf("CU/SM : %d\n", i);
+        w_c.setGridDim(i);
+        b_c.setGridDim(i);
+        double t1 = 0, t2 = 0;
+        t1 += w_c.Record();
+        printf("warp copy bandwidth (GB/s): %f\n", t1);
 
-    t2 += b_c.Record();
-    printf("block copy bandwidth (GB/s): %f\n", t2);
-    //}
-    //b.check(0, size);
+        t2 += b_c.Record();
+        printf("block copy bandwidth (GB/s): %f\n", t2);
+    }
+    b.check(0, size);
     HIP_CHECK(hipDeviceSynchronize());
     return 0;
 }
