@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     WarpCopier<_type, FACTOR> w_c(p, 4);
     BlockCopier<_type, FACTOR> b_c(p, 4);
 
-    for (int i = 4; i < 32; i *= 2)
+    for (int i = 4; i <= 32; i *= 2)
     {
         printf("CU/SM : %d\n", i);
         w_c.setGridDim(i);
